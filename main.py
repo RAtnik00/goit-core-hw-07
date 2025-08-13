@@ -20,6 +20,7 @@ class Phone(Field):
             raise ValueError("Phone number must be exactly 10 digits.")
         super().__init__(value)
 
+
 class Birthday(Field):
     def __init__(self, value):
         try:
@@ -36,8 +37,8 @@ class Record:
         self.birthday = None
 
     def __str__(self):
-        phones_str = ';'.join(p.value for p in self.phones) if self.phones else ''
-        birthday_str = f", birthday: {self.birthday.value}" if self.birthday else ''
+        phones_str = ";".join(p.value for p in self.phones) if self.phones else ""
+        birthday_str = f", birthday: {self.birthday.value}" if self.birthday else ""
         return f"Contact name: {self.name.value}, phones: {phones_str}{birthday_str}"
 
     def add_phone(self, phone):
@@ -100,16 +101,22 @@ class AddressBook(UserDict):
                     shift = 7 - congr_date.weekday()
                     congr_date = congr_date + timedelta(days=shift)
 
-                items.append((congr_date, {
-                    "name": record.name.value,
-                    "birthday": congr_date.strftime("%d.%m.%Y"),
-                }))
+                items.append(
+                    (
+                        congr_date,
+                        {
+                            "name": record.name.value,
+                            "birthday": congr_date.strftime("%d.%m.%Y"),
+                        },
+                    )
+                )
 
         items.sort(key=lambda t: t[0])
-        return  [d for _, d in items]
+        return [d for _, d in items]
 
     def __str__(self):
         return "\n".join(str(record) for record in self.data.values())
+
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -121,13 +128,14 @@ def input_error(func):
             return str(e) if str(e) else "Enter user name."
         except IndexError:
             return "Not enough arguments."
+
     return inner
 
 
 def parse_input(user_input):
     parts = user_input.strip().split()
     if not parts:
-        return '', []
+        return "", []
     cmd, *args = parts
     return cmd.lower(), args
 
@@ -156,7 +164,7 @@ def change_contact(args, book: AddressBook):
     record = book.find(name)
     if record is None:
         raise ValueError("Contact not found.")
-    record.edit_phone(old_phone, new_phone)  # may raise ValueError
+    record.edit_phone(old_phone, new_phone)
     return "Contact updated."
 
 
@@ -178,6 +186,7 @@ def show_all(book: AddressBook):
         return "No contacts found."
     return "\n".join(str(record) for record in book.data.values())
 
+
 @input_error
 def add_birthday(args, book: AddressBook):
     if len(args) < 2:
@@ -189,6 +198,7 @@ def add_birthday(args, book: AddressBook):
     record.add_birthday(date_str)
     return "Birthday added"
 
+
 @input_error
 def show_birthday(args, book: AddressBook):
     if len(args) < 1:
@@ -196,13 +206,14 @@ def show_birthday(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
     if record is None:
-        raise  ValueError("Contact not found")
+        raise ValueError("Contact not found")
     if not record.birthday:
         return "No birthday set"
     return record.birthday.value
 
+
 @input_error
-def birthdays(args, book: AddressBook):
+def birthdays(_, book: AddressBook):
     items = book.get_upcoming_birthdays()
     if not items:
         return "No upcoming birthdays."
@@ -210,11 +221,11 @@ def birthdays(args, book: AddressBook):
     for it in items:
         groups.setdefault(it["birthday"], []).append(it["name"])
     ordered = sorted(
-        groups.items(),
-        key=lambda kv: datetime.strptime(kv[0], "%d.%m.%Y")
+        groups.items(), key=lambda kv: datetime.strptime(kv[0], "%d.%m.%Y")
     )
     lines = [f'{d}: {", ".join(names)}' for d, names in ordered]
     return "\n".join(lines)
+
 
 def main():
     book = AddressBook()
@@ -253,7 +264,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
