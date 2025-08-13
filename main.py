@@ -1,5 +1,8 @@
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime, date, timedelta
+
+from dateutil.utils import today
+
 
 class Field:
     def __init__(self, value):
@@ -78,6 +81,34 @@ class AddressBook(UserDict):
             del self.data[name]
         else:
             raise KeyError("Contact not found.")
+
+    def get_upcoming_birthdays(self, days: int = 7):
+        today = date.today()
+        window = days - 1
+        items = []
+
+        for record in self.data.values():
+            if not record.birthday:
+                continue
+            born = datetime.strptime(record.birthday.value, "%d.%m.%Y").date()
+            this_year_bd = born.replace(year=today.year)
+            if this_year_bd < today:
+                this_year_bd = born.replace(year=today.year + 1)
+
+            delta = (this_year_bd - today).days
+            if 0 <= delta <= window:
+                congr_date = this_year_bd
+                if congr_date.weekday() >= 5:
+                    shift = 7 - congr_date.weekday()
+                    congr_date = congr_date + timedelta(days=shift)
+
+                items.append((congr_date, {
+                    "name": record.name.value,
+                    "birthday": congr_date.strftime("%d.%m.%Y"),
+                }))
+
+        items.sort(key=lambda t: t[0])
+        return  [d for _, d in items]
 
     def __str__(self):
         return "\n".join(str(record) for record in self.data.values())
@@ -181,7 +212,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 
