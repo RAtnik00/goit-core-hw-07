@@ -1,8 +1,6 @@
 from collections import UserDict
 from datetime import datetime, date, timedelta
 
-from dateutil.utils import today
-
 
 class Field:
     def __init__(self, value):
@@ -180,6 +178,44 @@ def show_all(book: AddressBook):
         return "No contacts found."
     return "\n".join(str(record) for record in book.data.values())
 
+@input_error
+def add_birthday(args, book: AddressBook):
+    if len(args) < 2:
+        raise IndexError
+    name, date_str, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise ValueError("Contact not found")
+    record.add_birthday(date_str)
+    return "Birthday added"
+
+@input_error
+def show_birthday(args, book: AddressBook):
+    if len(args) < 1:
+        raise IndexError
+    name, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise  ValueError("Contact not found")
+    if not record.birthday:
+        return "No birthday set"
+    return record.birthday.value
+
+@input_error
+def birthdays(args, book: AddressBook):
+    items = book.get_upcoming_birthdays()
+    if not items:
+        return "No upcoming birthdays."
+    groups = {}
+    for it in items:
+        groups.setdefault(it["birthday"], []).append(it["name"])
+    ordered = sorted(
+        groups.items(),
+        key=lambda kv: datetime.strptime(kv[0], "%d.%m.%Y")
+    )
+    lines = [f'{d}: {", ".join(names)}' for d, names in ordered]
+    return "\n".join(lines)
+
 def main():
     book = AddressBook()
     print("Welcome to the assistant bot!")
@@ -205,7 +241,12 @@ def main():
 
         elif command == "all":
             print(show_all(book))
-
+        elif command == "add-birthday":
+            print(add_birthday(args, book))
+        elif command == "show-birthday":
+            print(show_birthday(args, book))
+        elif command == "birthdays":
+            print(birthdays(args, book))
         else:
             print("Invalid command.")
 
