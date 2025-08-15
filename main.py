@@ -128,8 +128,8 @@ def input_error(func):
             return str(e) if str(e) else "Enter user name."
         except IndexError:
             return "Not enough arguments."
-        except AttributeError as e:
-            return str(e) if str(e) else "Attribute error."
+        except AttributeError:
+            return "Contact not found."
 
     return inner
 
@@ -160,8 +160,6 @@ def add_contact(args, book: AddressBook):
 def change_contact(args, book: AddressBook):
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
-    if record is None:
-        raise ValueError("Contact not found.")
     record.edit_phone(old_phone, new_phone)
     return "Contact updated."
 
@@ -170,8 +168,6 @@ def change_contact(args, book: AddressBook):
 def show_phone(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
-    if record is None:
-        raise ValueError("Contact not found.")
     if not record.phones:
         return "No phones for this contact."
     return ";".join(p.value for p in record.phones)
@@ -187,8 +183,6 @@ def show_all(book: AddressBook):
 def add_birthday(args, book: AddressBook):
     name, date_str, *_ = args
     record = book.find(name)
-    if record is None:
-        raise ValueError("Contact not found")
     record.add_birthday(date_str)
     return "Birthday added"
 
@@ -197,8 +191,6 @@ def add_birthday(args, book: AddressBook):
 def show_birthday(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
-    if record is None:
-        raise ValueError("Contact not found")
     if not record.birthday:
         return "No birthday set"
     return record.birthday.value
