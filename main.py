@@ -128,6 +128,8 @@ def input_error(func):
             return str(e) if str(e) else "Enter user name."
         except IndexError:
             return "Not enough arguments."
+        except AttributeError as e:
+            return str(e) if str(e) else "Attribute error."
 
     return inner
 
@@ -142,8 +144,6 @@ def parse_input(user_input):
 
 @input_error
 def add_contact(args, book: AddressBook):
-    if len(args) < 2:
-        raise IndexError
     name, phone, *_ = args
     record = book.find(name)
     message = "Contact updated."
@@ -158,8 +158,6 @@ def add_contact(args, book: AddressBook):
 
 @input_error
 def change_contact(args, book: AddressBook):
-    if len(args) < 3:
-        raise IndexError
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
     if record is None:
@@ -170,8 +168,6 @@ def change_contact(args, book: AddressBook):
 
 @input_error
 def show_phone(args, book: AddressBook):
-    if len(args) < 1:
-        raise IndexError
     name, *_ = args
     record = book.find(name)
     if record is None:
@@ -189,8 +185,6 @@ def show_all(book: AddressBook):
 
 @input_error
 def add_birthday(args, book: AddressBook):
-    if len(args) < 2:
-        raise IndexError
     name, date_str, *_ = args
     record = book.find(name)
     if record is None:
@@ -201,8 +195,6 @@ def add_birthday(args, book: AddressBook):
 
 @input_error
 def show_birthday(args, book: AddressBook):
-    if len(args) < 1:
-        raise IndexError
     name, *_ = args
     record = book.find(name)
     if record is None:
@@ -252,12 +244,16 @@ def main():
 
         elif command == "all":
             print(show_all(book))
+
         elif command == "add-birthday":
             print(add_birthday(args, book))
+
         elif command == "show-birthday":
             print(show_birthday(args, book))
+
         elif command == "birthdays":
             print(birthdays(args, book))
+
         else:
             print("Invalid command.")
 
